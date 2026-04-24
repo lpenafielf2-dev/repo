@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Moderna</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #121212;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .calculator {
+            background: #1e1e1e;
+            border: 1px solid #333333;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+            width: 320px;
+        }
+
+        .display {
+            background: #000000;
+            border-radius: 16px;
+            padding: 25px 20px;
+            margin-bottom: 25px;
+            text-align: right;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 1);
+            border: 1px solid #333333;
+        }
+
+        .display #previous-operand {
+            color: #888888;
+            font-size: 15px;
+            min-height: 18px;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .display #current-operand {
+            color: #ffffff;
+            font-size: 42px;
+            font-weight: 600;
+            word-wrap: break-word;
+            word-break: break-all;
+            letter-spacing: -1px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        button {
+            border: none;
+            outline: none;
+            background: #2a2a2a;
+            color: #ffffff;
+            font-size: 22px;
+            padding: 18px 0;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #3a3a3a;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button:hover {
+            background: #3a3a3a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            background: #1a1a1a;
+        }
+
+        .operator {
+            background: #ffffff;
+            color: #000000;
+            font-weight: 600;
+            border: 1px solid #ffffff;
+        }
+
+        .operator:hover {
+            background: #e0e0e0;
+        }
+
+        .clear {
+            background: #444444;
+            color: #ffffff;
+            font-weight: 600;
+            border: 1px solid #555555;
+        }
+
+        .clear:hover {
+            background: #555555;
+        }
+
+        .equals {
+            background: #ffffff;
+            color: #000000;
+            grid-column: span 2;
+            font-weight: 600;
+            border: 1px solid #ffffff;
+        }
+
+        .equals:hover {
+            background: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display">
+            <div id="previous-operand"></div>
+            <div id="current-operand">0</div>
+        </div>
+        <div class="buttons">
+            <button class="clear" onclick="clearDisplay()">AC</button>
+            <button onclick="deleteNumber()">DEL</button>
+            <button class="operator" onclick="appendOperator('%')">%</button>
+            <button class="operator" onclick="appendOperator('/')">÷</button>
+            
+            <button onclick="appendNumber('7')">7</button>
+            <button onclick="appendNumber('8')">8</button>
+            <button onclick="appendNumber('9')">9</button>
+            <button class="operator" onclick="appendOperator('*')">×</button>
+            
+            <button onclick="appendNumber('4')">4</button>
+            <button onclick="appendNumber('5')">5</button>
+            <button onclick="appendNumber('6')">6</button>
+            <button class="operator" onclick="appendOperator('-')">−</button>
+            
+            <button onclick="appendNumber('1')">1</button>
+            <button onclick="appendNumber('2')">2</button>
+            <button onclick="appendNumber('3')">3</button>
+            <button class="operator" onclick="appendOperator('+')">+</button>
+            
+            <button onclick="appendNumber('0')">0</button>
+            <button onclick="appendNumber('.')">.</button>
+            <button class="equals" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let currentOperand = '0';
+        let previousOperand = '';
+        let operation = undefined;
+
+        const currentOperandElement = document.getElementById('current-operand');
+        const previousOperandElement = document.getElementById('previous-operand');
+
+        function updateDisplay() {
+            const floatNumber = parseFloat(currentOperand);
+            if (isNaN(floatNumber) && currentOperand !== 'Error') {
+                currentOperandElement.innerText = currentOperand;
+            } else if (currentOperand === 'Error') {
+                currentOperandElement.innerText = 'Error';
+            } else {
+                currentOperandElement.innerText = floatNumber.toLocaleString('en-US', { maximumFractionDigits: 10 });
+                if (currentOperand.endsWith('.')) {
+                    currentOperandElement.innerText += '.';
+                }
+            }
+
+            if (operation != null) {
+                let opSymbol = operation;
+                if (operation === '/') opSymbol = '÷';
+                if (operation === '*') opSymbol = '×';
+                if (operation === '-') opSymbol = '−';
+                previousOperandElement.innerText = `${parseFloat(previousOperand).toLocaleString('en-US', { maximumFractionDigits: 10 })} ${opSymbol}`;
+            } else {
+                previousOperandElement.innerText = '';
+            }
+        }
+
+        function clearDisplay() {
+            currentOperand = '0';
+            previousOperand = '';
+            operation = undefined;
+            updateDisplay();
+        }
+
+        function deleteNumber() {
+            if (currentOperand === '0' || currentOperand === 'Error') return;
+            if (currentOperand.length === 1 || (currentOperand.length === 2 && currentOperand.startsWith('-'))) {
+                currentOperand = '0';
+            } else {
+                currentOperand = currentOperand.toString().slice(0, -1);
+            }
+            updateDisplay();
+        }
+
+        function appendNumber(number) {
+            if (currentOperand === 'Error') clearDisplay();
+            if (number === '.' && currentOperand.includes('.')) return;
+            
+            if (currentOperand === '0' && number !== '.') {
+                currentOperand = number.toString();
+            } else {
+                if (currentOperand.replace('.', '').length < 12) {
+                    currentOperand = currentOperand.toString() + number.toString();
+                }
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (currentOperand === 'Error') return;
+            if (currentOperand === '0' && previousOperand === '') return;
+            
+            if (previousOperand !== '') {
+                calculate();
+            }
+            operation = op;
+            previousOperand = currentOperand;
+            currentOperand = '0';
+            updateDisplay();
+        }
+
+        function calculate() {
+            let computation;
+            const prev = parseFloat(previousOperand);
+            const current = parseFloat(currentOperand);
+            if (isNaN(prev) || isNaN(current)) return;
+            
+            switch (operation) {
+                case '+':
+                    computation = prev + current;
+                    break;
+                case '-':
+                    computation = prev - current;
+                    break;
+                case '*':
+                    computation = prev * current;
+                    break;
+                case '/':
+                    if (current === 0) {
+                        computation = 'Error';
+                    } else {
+                        computation = prev / current;
+                    }
+                    break;
+                case '%':
+                    computation = prev % current;
+                    break;
+                default:
+                    return;
+            }
+            
+            if (computation === 'Error') {
+                currentOperand = 'Error';
+            } else {
+                currentOperand = Math.round(computation * 10000000000) / 10000000000;
+                currentOperand = currentOperand.toString();
+            }
+            
+            operation = undefined;
+            previousOperand = '';
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
